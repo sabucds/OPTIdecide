@@ -1,21 +1,23 @@
 import React from 'react';
 import NProgress from 'nprogress';
-import Router from 'next/router';
+import Router, { useRouter, withRouter } from 'next/router';
 import Head from 'next/head';
 import { AppProps } from 'next/app';
 import { ApolloProvider } from '@apollo/client';
 import { SessionProvider } from 'next-auth/react';
-import {
-  ThemeContextProvider,
-  ToastContextProvider,
-  UserContextProvider,
-} from '../context';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ToastContextProvider, UserContextProvider } from '../context';
 import { useApollo } from '../hooks';
 import '../style.css';
+import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
+
+// a
 
 // @ts-expect-error err is not defined
 function MyApp({ Component, pageProps, err }: AppProps<any>) {
   const apolloClient = useApollo(pageProps.initialApolloState);
+  const queryClient = new QueryClient();
   React.useEffect(() => {
     Router.events.on('routeChangeStart', () => {
       NProgress.start();
@@ -52,24 +54,41 @@ function MyApp({ Component, pageProps, err }: AppProps<any>) {
       localStorage.removeItem('theme');
     }
   }, []);
+
+  const router = useRouter();
   return (
     <SessionProvider session={pageProps.session} refetchInterval={0}>
       <ApolloProvider client={apolloClient}>
         <>
           <Head>
-            <title>Avila Tek | Template</title>
+            <title>OPTIdecide</title>
+            <link rel="icon" href="/LogoOptidecide.ico" />
           </Head>
-          <ThemeContextProvider>
+          <QueryClientProvider client={queryClient}>
             <ToastContextProvider>
               <UserContextProvider>
+                {router.pathname === '/sign-in' ||
+                router.pathname === '/sign-up' ||
+                router.pathname === '/forgot-password' ||
+                router.pathname === '/reset-password/[token]' ||
+                router.pathname === '/reset-password/confirmation' ? null : (
+                  <Navbar />
+                )}
                 <Component {...pageProps} err={err} />
+                {router.pathname === '/sign-in' ||
+                router.pathname === '/sign-up' ||
+                router.pathname === '/forgot-password' ||
+                router.pathname === '/reset-password/[token]' ||
+                router.pathname === '/reset-password/confirmation' ? null : (
+                  <Footer />
+                )}
               </UserContextProvider>
             </ToastContextProvider>
-          </ThemeContextProvider>
+          </QueryClientProvider>
         </>
       </ApolloProvider>
     </SessionProvider>
   );
 }
 
-export default MyApp;
+export default withRouter(MyApp);

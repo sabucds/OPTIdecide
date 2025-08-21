@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { User } from '../models';
 
 interface IUserContext {
@@ -20,7 +20,7 @@ interface UserContextProviderProps {
 
 export function UserContextProvider({ children }: UserContextProviderProps) {
   const session = useSession();
-  console.log('session', session);
+  // console.log('session', session);
   const [user, setUser] = React.useState<User>(null);
   const router = useRouter();
   React.useEffect(() => {

@@ -29,12 +29,15 @@
     "next-compose-plugins": "^2.2.1",
     "nprogress": "^0.2.0",
     "react": "^18.2.0",
+    "react-digraph": "^9.1.2",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.47.0",
     "react-phone-input-2": "^2.15.1",
     "react-query": "^3.39.3",
     "react-table": "^7.8.0",
     "uuid": "^9.0.0",
-    "venezuela": "^2.0.0"
+    "venezuela": "^2.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@avila-tek/tsconfig": "*",
@@ -48,6 +51,7 @@
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "@typescript-eslint/parser": "^5.57.0",
     "autoprefixer": "^10.4.14",
+    "esbuild": "^0.19.11",
     "eslint": "^8.37.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-avilatek": "^1.15.0",
@@ -55,6 +59,7 @@
     "eslint-config-custom": "*",
     "eslint-config-next": "^13.2.4",
     "eslint-config-prettier": "^8.8.0",
+    "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-html": "^7.1.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
@@ -66,6 +71,7 @@
     "postcss-import": "^15.1.0",
     "prettier": "^2.8.7",
     "tailwindcss": "^3.3.0",
+    "tsup": "^8.0.1",
     "typescript": "^5.0.2"
   }
 }

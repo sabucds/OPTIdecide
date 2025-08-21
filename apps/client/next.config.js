@@ -4,20 +4,22 @@
 // with Sentry.
 // https://nextjs.org/docs/api-reference/next.config.js/introduction
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
+const path = require('path');
 
 const withTM = require('next-transpile-modules')(['@avila-tek/ui']);
 const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const moduleExports = {
-  // Your existing module.exports
   reactStrictMode: true,
   swcMinify: true,
-  // experimental: {
-  //   images: {
-  //     allowFutureImage: true,
-  //   },
-  // },
+  transpilePackages: ['@avila-tek/ui', '@avila-tek/models'],
+  productionBrowserSourceMaps: true,
+  ignoreBuildErrors: true,
+  output: 'standalone',
+  sentry: {
+    hideSourceMaps: true,
+  },
 };
 
 const sentryWebpackPluginOptions = {
@@ -30,5 +32,5 @@ const sentryWebpackPluginOptions = {
 // ensure that your source maps include changes from all other Webpack plugins
 module.exports =
   process.env.NODE_ENV === 'production'
-    ? withTM(moduleExports) // ? withSentryConfig(withTM(moduleExports), sentryWebpackPluginOptions)
-    : withTM(moduleExports);
+    ? moduleExports // ? withSentryConfig(withTM(moduleExports), sentryWebpackPluginOptions)
+    : moduleExports;

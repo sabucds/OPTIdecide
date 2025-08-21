@@ -1,4 +1,3 @@
-import solver from 'javascript-lp-solver/src/solver';
 import { ModelInitialData, ModelMathEquations, ModelResult } from '../models';
 import { constructPModel } from './generatePModel';
 import generateMathModelString from './generateMathModelString';
@@ -6,7 +5,7 @@ import { method1, method2, method3 } from './uncertaintySolvingMethods';
 import generateQModel from './generateQModel';
 import { externalSolve } from './lpSolve/externalSolve';
 
-export async function solve(data: ModelInitialData, method: 1 | 2 | 3 = 1) {
+export async function solve(data: ModelInitialData, method: 1 | 2 | 3 = 3) {
   const solutionsMap: ModelResult[] = [];
   // this object is made with the purpose of constructing the math equations for the model and paste them in Lingo app to compare results
   const modelMathEquations: ModelMathEquations = {
@@ -20,12 +19,24 @@ export async function solve(data: ModelInitialData, method: 1 | 2 | 3 = 1) {
     modelMathEquations,
   });
 
-  let results: ModelResult = solver.Solve(model);
+  let results: ModelResult = await externalSolve({
+    ...model,
+  });
+
+  if (!results?.feasible)
+    throw new Error('El problema ingresado no tiene solución');
 
   const modelsForLingo = [
     { modelNumber: 0, model: generateMathModelString(modelMathEquations) },
   ];
-
+  
+  if (Object.keys(xVariablesWithUncertainty).length === 0) {
+    return {
+      solutionsMap: [results],
+      modelsForLingo,
+      dataConventions,
+    };
+  }
   // method1 and 2 only execute once so we don't need to loop over them
   if (method === 1 || method === 2)
     model = (method === 1 ? method1 : method2)({

@@ -1,6 +1,6 @@
 import React from 'react';
 import * as Sentry from '@sentry/nextjs';
-import { ClientOnlyPortal, Toast } from '@avila-tek/ui';
+import { ClientOnlyPortal, Toast } from '@avila-tek/ui/src';
 import { AnimatePresence, motion } from 'framer-motion';
 import { v4 as uuid } from 'uuid';
 
@@ -14,22 +14,22 @@ interface IToastContext {
 }
 
 type TAlert = {
-  content: React.ReactNode;
+  content: any;
   type: 'success' | 'error' | 'warning' | 'info';
   id: string;
   timeOut: NodeJS.Timeout;
 };
 
 interface ToastContextProvider {
-  children?: React.ReactNode;
+  children?: any;
 }
 
-export const ToastContext = React.createContext<IToastContext>({
+export const ToastContext = React.createContext({
   alerts: [],
   notify: (content, type, err) => {
     console.log('');
   },
-});
+}) as any;
 
 export function ToastContextProvider({ children }: ToastContextProvider) {
   const [alerts, setAlerts] = React.useState<TAlert[]>([]);
@@ -105,5 +105,5 @@ export function ToastContextProvider({ children }: ToastContextProvider) {
       </ClientOnlyPortal>
       {children}
     </ToastContext.Provider>
-  );
+  ) as any;
 }

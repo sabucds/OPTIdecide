@@ -3,7 +3,9 @@ import { IMathModel, MathModel } from './mathModel.model';
 import { solve } from '../../utils/modelFunctions/solve';
 import {
   getDecisionMatrix,
+  getSolutionByLaplaceCriteria,
   getSolutionByRobustnessCriteria,
+  getSolutionBySavageCriteria,
 } from '../../utils/modelFunctions/decisionCriteria';
 
 export async function findOne(
@@ -24,17 +26,31 @@ export async function find(
 
 export async function create(mathModel: IMathModel) {
   const start = Date.now();
-  return solve(mathModel?.data, mathModel?.method ?? 1).then(
+  return solve(mathModel?.data, mathModel?.method).then(
     ({ solutionsMap, modelsForLingo, dataConventions }) => {
-      const decisionMatrix = getDecisionMatrix(
-        mathModel?.data,
-        solutionsMap,
-        mathModel.intervals ?? 5
-      );
-      const finalSolution = getSolutionByRobustnessCriteria(
-        decisionMatrix,
-        solutionsMap
-      );
+      let finalSolution = solutionsMap[0];
+      let laplaceSolution = solutionsMap[0];
+      let savageSolution = solutionsMap[0];
+
+      if (solutionsMap.length > 1) {
+        const decisionMatrix = getDecisionMatrix(
+          mathModel?.data,
+          solutionsMap,
+          mathModel.intervals ?? 2
+        );
+        finalSolution = getSolutionByRobustnessCriteria(
+          decisionMatrix,
+          solutionsMap
+        );
+        laplaceSolution = getSolutionByLaplaceCriteria(
+          decisionMatrix,
+          solutionsMap
+        );
+        savageSolution = getSolutionBySavageCriteria(
+          decisionMatrix,
+          solutionsMap
+        );
+      }
 
       return MathModel.create({
         ...mathModel,
@@ -42,6 +58,9 @@ export async function create(mathModel: IMathModel) {
         averageExecutionTime: Date.now() - start,
         lingoModels: modelsForLingo,
         finalSolution,
+        dataConventions,
+        laplaceSolution,
+        savageSolution,
       });
     }
   );

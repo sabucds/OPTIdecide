@@ -8,6 +8,10 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**"]
     },
+    "ui#build": {
+      "dependsOn": ["utils#build"],
+      "outputs": ["dist/**"]
+    },
     "admin#build": {
       "dependsOn": ["^build", "@avila-tek/ui#build"],
       "outputs": [".next/**"],

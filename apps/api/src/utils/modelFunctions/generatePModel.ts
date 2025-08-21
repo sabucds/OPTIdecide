@@ -94,6 +94,17 @@ function getConstraints({
 
   // GENERATING MODEL CONSTRAINTS
 
+  // declare total budget constraint for the model
+  if (totalBudget && totalBudget > 0)
+    modelMathEquations.constraints = {
+      ...modelMathEquations.constraints,
+      budgetConstraint: {
+        leftSide: ' 0',
+        inequalitySign: '<=',
+        rightSide: `${totalBudget}`,
+      },
+    };
+
   clients.forEach(({ id: client }) => {
     clientAssignationConstraint[`client_assignation_x_${client}`] = {
       equal: 1,
@@ -239,9 +250,12 @@ function getConstraints({
       productAmountAndDemandConstraint,
       factoryCapacityPerProductConstraint,
       productAndLocationCapacityConstraint,
-      budgetConstraint: {
-        budgetConstraint: { max: totalBudget },
-      },
+      ...(totalBudget &&
+        totalBudget > 0 && {
+          budgetConstraint: {
+            budgetConstraint: { max: totalBudget },
+          },
+        }),
     },
     xBinaryVariables,
     yBinaryVariables,
@@ -297,6 +311,7 @@ function getVariables({
     productAmountAndDemandConstraint,
     factoryCapacityPerProductConstraint,
     productAndLocationCapacityConstraint,
+    budgetConstraint,
   } = modelConstraints;
 
   // CONSTRAINTS ARRAYS WHERE X VARIABLES ARE INVOLVED / clientAssignationConstraintArray(1), locationSelectionConstraintArray(1), totalDemandLocationCapacityConstraintArray(1), productAmountAndDemandConstraintArray(more than one per xVariable)
@@ -505,7 +520,7 @@ function getVariables({
           }
         : {}),
 
-      budgetConstraint: locationCost, // the sum of all location costs must be less than the budget
+      ...(budgetConstraint && { budgetConstraint: locationCost }), // the sum of all location costs must be less than the budget
 
       cost: locationCost,
     };
@@ -534,6 +549,14 @@ function getVariables({
                 totalDemandLocationCapacityConstraintKey
               ],
               rightSide: `${modelMathEquations.constraints[totalDemandLocationCapacityConstraintKey].rightSide} + ${locationCapacityForConstraints}*${key}`,
+            },
+          }
+        : {}),
+      ...(budgetConstraint
+        ? {
+            budgetConstraint: {
+              ...modelMathEquations.constraints.budgetConstraint,
+              leftSide: `${modelMathEquations.constraints.budgetConstraint.leftSide} + ${locationCost}*${key}`,
             },
           }
         : {}),
@@ -704,7 +727,7 @@ export function constructPModel({
       optimize: 'cost',
       opType: 'min',
       constraints: {
-        ...modelConstraints.budgetConstraint,
+        ...modelConstraints?.budgetConstraint,
         ...modelConstraints.clientAssignationConstraint,
         ...modelConstraints.factoryCapacityPerProductConstraint,
         ...modelConstraints.locationSelectionConstraint,

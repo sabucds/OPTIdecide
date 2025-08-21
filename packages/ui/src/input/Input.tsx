@@ -7,35 +7,50 @@ export interface InputProps
   > {
   label?: string;
   children?: React.ReactNode;
+  error?: string;
   rightIcon?: React.ReactNode;
 }
-
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   function _Input(
-    { label = '', children, rightIcon, className = '', onChange, ...props },
+    {
+      label = '',
+      children,
+      rightIcon,
+      className = '',
+      error = '',
+      onChange,
+      id, // Agrega un ID como prop
+      ...props
+    },
     ref
   ) {
+    // Genera un ID único si no se proporciona
+    const inputId = id || `input-${Math.floor(Math.random() * 10000)}`;
+
     return (
-      <label className="block">
+      <label className="block" htmlFor={inputId}>
         {label !== '' ? (
-          <span className="text-neutral-200 text-sm font-medium mb-2 ">
-            {label}
-          </span>
+          <span className="font-semibold text-text mb-2">{label}</span>
         ) : null}
-        <div
-          className={`w-full border-[0.5px] border-solid border-neutral-100 rounded flex items-center py-2 px-3 gap-4 ${className}`}
-        >
+        <div className={`w-full rounded flex items-center py-2  `}>
           {children}
           <input
+            id={inputId} // Asocia el campo de entrada con el ID
             className={`${
               label !== '' ? ' ' : ''
-            } focus:ring-0  border-none appearance-none h-6 bg-transparent outline-none focus:outline-none focus:shadow-none w-full placeholder:text-neutral-100  tracking-wider  placeholder:text-sm  p-0 ${className}`}
+            } w-full px-4 py-2 border border-primary-300 rounded-md text-text-light ${className} ${
+              rightIcon && 'mr-4'
+            }`}
             ref={ref}
             onChange={onChange}
+            aria-label={label}
             {...props}
           />
           {rightIcon}
         </div>
+        {error ? (
+          <span className="text-sm text-danger-300 capitalize">{error}</span>
+        ) : null}
       </label>
     );
   }

@@ -43,14 +43,22 @@ export function externalSolve(model): Promise<ModelResult> {
       const data = formatFromJSON(model);
 
       const scriptPath = path
-        .join(__dirname, '/lp_solve_5.5/lp_solve/bin/osx64/lp_solve')
+        .join(
+          __dirname,
+          process.env.NODE_ENV === 'development'
+            ? '/lp_solve_5.5/lp_solve/bin/osx64/lp_solve'
+            : '/lp_solve_5/lp_solve'
+        )
         .replace('dist', 'src');
 
       const textPath = path
         .join(__dirname, '/temp/out.txt')
         .replace('dist', 'src');
+
       // Write the model data to a file
       fs.writeFile(textPath, data, (err) => {
+        console.log('WRITE FILE ERROR: ', err);
+
         if (err) reject(err);
 
         const exec = execFile.execFile;
@@ -58,6 +66,8 @@ export function externalSolve(model): Promise<ModelResult> {
         // Execute the external process
         exec(scriptPath, [textPath], (error, data_) => {
           if (error) {
+            console.log('error ejec', error);
+
             if (error.code === 1) {
               // Handle specific exit code 1 as needed
               resolve({
@@ -70,7 +80,16 @@ export function externalSolve(model): Promise<ModelResult> {
               // Handle other error cases
               const codes = {
                 '-2': 'Out of Memory',
-                // Add more error codes as needed
+                '1': 'SUBOPTIMAL',
+                '2': 'INFEASIBLE',
+                '3': 'UNBOUNDED',
+                '4': 'DEGENERATE',
+                '5': 'NUMFAILURE',
+                '6': 'USER-ABORT',
+                '7': 'TIMEOUT',
+                '9': 'PRESOLVED',
+                '25': 'ACCURACY ERROR',
+                '255': 'FILE-ERROR',
               };
 
               const retObj = {
@@ -78,6 +97,7 @@ export function externalSolve(model): Promise<ModelResult> {
                 meaning: codes[error.code] || 'Unknown Error',
                 data: data_,
               };
+              console.log(retObj);
 
               reject(retObj);
             }
@@ -93,6 +113,8 @@ export function externalSolve(model): Promise<ModelResult> {
         });
       });
     } catch (e) {
+      console.log('error catch', e);
+
       reject(e);
     }
   });
